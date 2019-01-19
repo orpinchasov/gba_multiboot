@@ -188,11 +188,11 @@ void master_receive()
 
 void master_transfer(uint8_t low, uint8_t high)
 {
-  cli();
-
   // TODO: I don't know at the moment why adding these
   // causes everything to collapse???
   //digitalWrite(SD_OUT, HIGH);
+
+  cli();
 
   master_send(low, high);
   master_receive();
@@ -200,4 +200,49 @@ void master_transfer(uint8_t low, uint8_t high)
   //digitalWrite(SD_OUT, LOW);
   
   sei();
+}
+
+void master_loop()
+{
+  char send_low = 0;
+  char send_high = 0;
+
+  /* TODO: This was supposed to remove corrupted commands
+   *  from the serial queue but it seems to introduct quite
+   *  a big lag.
+   *
+  if (Serial.available() != 2) {
+    delay(50);
+    int amount = 0;
+    if (amount = Serial.available() != 2) {
+      for (int i=0; i < amount; ++i) {
+        Serial.read();
+        Serial.write(0);
+      }
+    }
+  }
+  */
+
+  if (Serial.available() >= 2) {
+    // NOTE: Here I had something really terrible.
+    // I declared these variables here and used them
+    // outside of the scope of this 'if' statement.
+    // There was no warning whatsoever and they
+    // were simply replaced by 0s. Took me a couple of
+    // hours to debug this thing :/
+    send_low = Serial.read();
+    send_high = Serial.read();
+  } else {
+    return;
+  }
+
+  master_transfer(send_low, send_high);
+
+  Serial.write(reverseBits(received_low));
+  Serial.write(reverseBits(received_high));
+  Serial.flush();
+
+  //delay(60);
+
+  return;
 }

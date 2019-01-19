@@ -178,4 +178,49 @@ void slave_transfer(uint8_t low, uint8_t high)
   sei();
 }
 
+void slave_loop()
+{
+  char command = 0;
+  uint8_t op1, op2 = 0;
+
+  uint8_t buffer[3] = {0};
+
+  while (Serial.available() > 0) {
+    if (Serial.readBytes(buffer, 3) < 3) {
+    } else {
+      if (buffer[0] == 0) {
+        // Update send data
+        send_low = buffer[1];
+        send_high = buffer[2];
+      } else if (buffer[0] == 1) {
+        // Clear to send
+        state = 1;
+        digitalWrite(LED, HIGH);
+        delay(10);
+      }
+    }
+  }
+
+  // Add an unlock mechanism if we're stuck
+  if (micros() > last_send + 1000) {
+    state = 1;
+  }
+
+  if (state == 1) {
+    // Received data, send it to the GB
+    communication_cycle(send_low, send_high);
+
+    Serial.write(reverseBits(received_low));
+    Serial.write(reverseBits(received_high));
+    Serial.flush();
+
+    last_send = micros();
+    
+    // Wait for next clear to send
+    state = 0;
+    digitalWrite(LED, LOW);
+    //delay(15);
+  }
+}
+
 #endif

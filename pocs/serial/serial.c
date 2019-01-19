@@ -81,13 +81,18 @@ void loop(HANDLE hComm)
 {
   unsigned char read_bytes[2] = {0};
 
-  unsigned char data[2] = {0x00, 0x00};
+  unsigned char data[2] = {0x00, 0x62};
 
-  printf("Writing to serial %02x%02x\n", data[0], data[1]);
-  write_to_serial(hComm, data, sizeof(data));
-  read_from_serial(hComm, &read_bytes[0], sizeof(read_bytes));
+  while (1) {
 
-  printf("Read bytes: %02x%02x\n", read_bytes[0], read_bytes[1]);
+	  printf("Writing to serial %02x%02x\n", data[0], data[1]);
+	  write_to_serial(hComm, data, sizeof(data));
+	  Sleep(10);
+	  read_from_serial(hComm, &read_bytes[0], sizeof(read_bytes));
+	  Sleep(10);
+
+	  printf("Read bytes: %02x%02x\n", read_bytes[0], read_bytes[1]);
+  }
 }
 
 int main()
@@ -119,7 +124,9 @@ int main()
 
   unsigned char read_bytes[2] = {0};
   
-  //loop(hComm);
+  loop(hComm);
+
+  return 1;
   
   
   write_command_to_arduino(hComm, 0, 0);
