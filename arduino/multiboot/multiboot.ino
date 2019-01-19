@@ -34,10 +34,17 @@ void setup()
 
   digitalWrite(SD_OUT, HIGH);
 
-  state = 0;
+  state = 1;
 
   received_low = 0;
   received_high = 0;
+
+  // Set a short timeout for the problem of two
+  // random bytes being sent to the Arduino upon
+  // initialization of port on PC.
+  Serial.setTimeout(50);
+
+  //digitalWrite(LED, LOW);
 }
 
 uint8_t reverseBits(uint8_t num) 
@@ -254,25 +261,58 @@ void loop2()
   }
 }
 
+uint8_t buffer[3] = {0};
+
 void loop()
 {
-  if (state == 0) {
-    // Wait for data to be sent
-    if (Serial.available() >= 2) {
-      send_low = Serial.read();
-      send_high = Serial.read();
-    
-      state = 1;
+  // TODO: Need to have it have a different default value
+  char command = 'c';
+  uint8_t op1, op2 = 0;
+
+  buffer[0] = 0;
+  buffer[1] = 0;
+  buffer[2] = 0;
+  
+  while (Serial.available() > 0) {
+    if (Serial.readBytes(buffer, 3) < 3) {
+      digitalWrite(LED, LOW);
+      return;
     }
-  } else if (state == 1) {
+
+    Serial.write(buffer[0]);
+    Serial.write(buffer[1]);
+    Serial.write(buffer[2]);
+    Serial.flush();
+  }
+
+  if (buffer[0] == 0) {
+    if ((buffer[1] == 0x34) && (buffer[2] == 0x12)) {
+      digitalWrite(LED, HIGH);
+    }
+  }
+
+  return;
+
+  if (command == 'a') {
+    // Update send data
+    send_high = op1;
+    send_low = op2;
+  } else if (command == 'b') {
+    // Clear to send
+    state = 1;
+    digitalWrite(LED, HIGH);
+  }
+
+  if (state == 1) {
     // Received data, send it to the GB
     communication_cycle(send_low, send_high);
-    Serial.write(reverseBits(received_high));
+
     Serial.write(reverseBits(received_low));
+    Serial.write(reverseBits(received_high));
     Serial.flush();
     
-    // Wait for more data
+    // Wait for next clear to send
     state = 0;
-  } else {
+    digitalWrite(LED, LOW);
   }
 }
