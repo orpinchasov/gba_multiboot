@@ -20,11 +20,11 @@ void configure_serial_port(HANDLE hComm)
     SetCommState(hComm, &dcbSerialParams);
 
     COMMTIMEOUTS timeouts = { 0 };
-    timeouts.ReadIntervalTimeout         = MAXDWORD; // in milliseconds
-    timeouts.ReadTotalTimeoutConstant    = 0; // in milliseconds
-    timeouts.ReadTotalTimeoutMultiplier  = 0; // in milliseconds
-    timeouts.WriteTotalTimeoutConstant   = 0; // in milliseconds
-    timeouts.WriteTotalTimeoutMultiplier = 0; // in milliseconds
+    timeouts.ReadIntervalTimeout         = 100; // in milliseconds
+    timeouts.ReadTotalTimeoutConstant    = 10; // in milliseconds
+    timeouts.ReadTotalTimeoutMultiplier  = 50; // in milliseconds
+    timeouts.WriteTotalTimeoutConstant   = 10; // in milliseconds
+    timeouts.WriteTotalTimeoutMultiplier = 50; // in milliseconds
 
     SetCommTimeouts(hComm, &timeouts);
 }
@@ -59,9 +59,7 @@ void write_command_to_arduino(HANDLE hComm, unsigned char command, unsigned shor
     buffer[0] = (unsigned char)command;
     memcpy(&buffer[1], (char *)&value, sizeof(value));
     
-    printf("sizeof(value) = %d\n", sizeof(value));
-    printf("sizeof(buffer) = %d\n", sizeof(buffer));
-    printf("%02x%02x%02x\n", buffer[0], buffer[1], buffer[2]);
+    printf("writing: %02x%02x%02x\n", buffer[0], buffer[1], buffer[2]);
 
     write_to_serial(hComm, buffer, sizeof(buffer));    
 }
@@ -119,17 +117,26 @@ int main()
 
   Sleep(1000);
 
+  unsigned char read_bytes[2] = {0};
+  
   //loop(hComm);
-  write_command_to_arduino(hComm, 0, 0x1234);
   
-  unsigned char read_bytes[3] = {0};
   
-  Sleep(100);
+  write_command_to_arduino(hComm, 0, 0);
+  write_command_to_arduino(hComm, 1, 0);
+  
+  //Sleep(100);
 
   read_from_serial(hComm, &read_bytes[0], sizeof(read_bytes));
-  printf("bytes: %02x%02x%02x\n", read_bytes[0], read_bytes[1], read_bytes[2]);
+  printf("bytes: %02x%02x\n", read_bytes[1], read_bytes[0]);
+  
+  write_command_to_arduino(hComm, 0, 0x7202);
+  write_command_to_arduino(hComm, 1, 0);
+  
+  //Sleep(100);
+  
   read_from_serial(hComm, &read_bytes[0], sizeof(read_bytes));
-  printf("bytes: %02x%02x%02x\n", read_bytes[0], read_bytes[1], read_bytes[2]);
+  printf("bytes: %02x%02x\n", read_bytes[1], read_bytes[0]);
 
   CloseHandle(hComm);//Closing the Serial Port
 
