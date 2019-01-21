@@ -59,5 +59,5 @@ void setup()
 
 void loop()
 {
-  master_loop();
+  sniffer_loop();
 }
