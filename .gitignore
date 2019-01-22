@@ -9,6 +9,16 @@ __pycache__/
 # C extensions
 *.so
 
+# Elf
+*.elf
+
+# GBA
+*.gba
+
+# General binary
+*.bin
+
+
 # Distribution / packaging
 .Python
 build/
