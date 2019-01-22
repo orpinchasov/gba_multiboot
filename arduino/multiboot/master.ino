@@ -164,11 +164,17 @@ void master_receive()
   "  dec r20                   \n"
   "  brne get_to_middle_of_last_bit \n"
 
+  // TODO: It's possible that we'd like to move this
+  // right before setting SC to high.
   // Set SO to HIGH to signal end of slave transfer
   "  sbi %[portb], %[si_pin_out]    \n"
 
+  // TODO: This has to be checked (if I reduced this to 40 though it
+  // was too short and the transfers failed). Apparently, it's really
+  // important. If I increase it from 100 to 150 I get much better
+  // results in quick sends.
   // Wait for timeout to end transfer
-  "  ldi r20, 100              \n"
+  "  ldi r20, 200              \n"
   "wait_for_timeout:           \n"
   "  dec r20                   \n"
   "  brne wait_for_timeout     \n"
@@ -188,16 +194,15 @@ void master_receive()
 
 void master_transfer(uint8_t low, uint8_t high)
 {
-  // TODO: I don't know at the moment why adding these
-  // causes everything to collapse???
-  //digitalWrite(SD_OUT, HIGH);
+  // NOTE: Trying to set SD here to high and putting
+  // it back down after we finish sending causes nothing
+  // to work. I'm not sure this scenario is necessary in
+  // any way though.
 
   cli();
 
   master_send(low, high);
   master_receive();
-
-  //digitalWrite(SD_OUT, LOW);
   
   sei();
 }

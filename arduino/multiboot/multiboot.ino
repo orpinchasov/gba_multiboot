@@ -27,6 +27,12 @@ void setup()
   
   // initialize digital pin LED_BUILTIN as an output.
   // TODO: Why is pullup necessary?
+  // TODO: SC can be either pullup or not, apparently. SI
+  // has to be without pullup. SD also not important. It
+  // seems that all values don't matter except SI.
+  // That's not true. While some things seem to work at first
+  // they only work correctly in a specific configuration.
+  // The following seems to be quite correct.
   pinMode(SC_IN, INPUT);
   pinMode(SD_IN, INPUT_PULLUP);
   pinMode(SI_IN, INPUT);
@@ -59,5 +65,5 @@ void setup()
 
 void loop()
 {
-  sniffer_loop();
+  master_loop();
 }
