@@ -1,0 +1,8 @@
+connector side
+orange - 3 - SI
+blue - 4 - SD
+brown - 5 - SC
+white - 6 - GND
+
+1 3 5
+2 4 6
