@@ -30,7 +30,7 @@ def main():
         result = read(s)
         if result is None:
             continue
-        print 'Read: %08x' % (result,)
+        print 'Read: %04x %04x' % (result >> 16, result & 0xffff)
 
 
 if __name__ == '__main__':
