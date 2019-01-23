@@ -18,7 +18,6 @@ __pycache__/
 # General binary
 *.bin
 
-
 # Distribution / packaging
 .Python
 build/
