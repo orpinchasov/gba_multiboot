@@ -10,6 +10,7 @@ __pycache__/
 *.so
 
 # Elf
+*.o
 *.elf
 
 # GBA

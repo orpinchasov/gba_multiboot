@@ -114,7 +114,7 @@ def send_main_data_2(s, data, hh, encrypt_seed):
     Client = [unpack('b', b)[0] for b in data]
     
     RData = transmission(s, ( (ClientLength-0xC0) >> 2 ) - 0x34 )
-	                                                
+                                                    
     print 'str5=%x\n' % (RData,)
 
     var_8 = RData
@@ -142,7 +142,7 @@ def send_main_data_2(s, data, hh, encrypt_seed):
             CRCTemp = CRCTemp >> 1
             if (var_30&0x01):
                 var_C = var_C^0x0A517
-	    
+        
             encrypt_seed = (encrypt_seed * 0x6F646573)+1
                 
             send_data16 = (encrypt_seed ^ data32) ^ ( (~(client_pos+0x2000000)+1) ^ 0x6465646F)
@@ -173,6 +173,34 @@ def send_main_data_2(s, data, hh, encrypt_seed):
         
         if not still_sending:
             break
+
+    
+    while (RData != 0x0075):
+        RData = transmission(s, send_data16)
+
+    send_data16 = 0x0066
+                                            
+    RData = transmission(s, send_data16)
+
+    data32 = ((((RData&0xFF00)+var_8)<<8)|0xFFFF0000)+var_1
+    for bit in xrange(32):
+        var_30 = var_C ^ data32
+        var_C  = var_C>>1
+        data32 = data32>>1
+        if (var_30 & 0x01):
+            var_C = var_C ^ 0x0A517
+    
+    RData = xfer(s, var_C)
+        
+    print '[[[%x:%x]]]\n' % (RData, var_C)
+    
+    if (var_C != RData):
+        print 'Transmision error: CRC Bad!.\n'
+        return 1
+    else:
+        print 'CRC Ok - Transmision Done.\n'
+        
+    return 0
     
 def send_main_data(s, data, hh, enc):
     filesize_long = ((len(data) - 0xc0) >> 2) - 0x34
@@ -261,7 +289,7 @@ def main():
     #data = data[:0x1a0]
     
     hh, enc = initialize(s, data)
-    send_main_data_2(s, data, hh, enc)
+    send_main_data(s, data, hh, enc)
 
 
 if __name__ == '__main__':

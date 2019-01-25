@@ -1,3 +1,7 @@
+#define SNIFFER_BIT_TIME (41)
+
+uint32_t data[100] = {0};
+
 uint32_t sniff()
 {
   uint8_t master_low_byte = 0;
@@ -41,7 +45,7 @@ uint32_t sniff()
   // We start the loop by waiting one bit to skip the start bit
 
   "m_wait_2_start:                 \n"
-  "  ldi r18, 40                   \n"
+  "  ldi r18, " XSTR(SNIFFER_BIT_TIME) "\n"
   "m_wait_2_loop:                  \n"
   "  dec r18                       \n"
   "  brne m_wait_2_loop            \n"
@@ -64,7 +68,7 @@ uint32_t sniff()
   "  ldi r19, 8                    \n"
 
   "m_wait_3_start:                 \n"
-  "  ldi r18, 40                   \n"
+  "  ldi r18, " XSTR(SNIFFER_BIT_TIME) "\n"
   "m_wait_3_loop:                  \n"
   "  dec r18                       \n"
   "  brne m_wait_3_loop            \n"
@@ -80,7 +84,7 @@ uint32_t sniff()
   "  mov %[m_high], r17            \n"
 
   "m_wait_4_start:                 \n"
-  "  sbis %[pind], %[sd_pin]       \n"
+  "  sbic %[pind], %[sd_pin]       \n"
   "  rjmp m_wait_4_start           \n"
 
   // Start slave sniffing
@@ -100,7 +104,7 @@ uint32_t sniff()
   "  brne s_wait_1_loop            \n"
 
   "s_wait_2_start:                 \n"
-  "  ldi r18, 40                   \n"
+  "  ldi r18, " XSTR(SNIFFER_BIT_TIME) "\n"
   "s_wait_2_loop:                  \n"
   "  dec r18                       \n"
   "  brne s_wait_2_loop            \n"
@@ -123,7 +127,7 @@ uint32_t sniff()
   "  ldi r19, 8                    \n"
 
   "s_wait_3_start:                 \n"
-  "  ldi r18, 40                   \n"
+  "  ldi r18, " XSTR(SNIFFER_BIT_TIME) "\n"
   "s_wait_3_loop:                  \n"
   "  dec r18                       \n"
   "  brne s_wait_3_loop            \n"
@@ -134,6 +138,10 @@ uint32_t sniff()
 
   "  dec r19                       \n"
   "  brne s_wait_3_start           \n"
+
+  "m_wait_sc_high:                 \n"
+  "  sbis %[pind], %[sc_pin]       \n"
+  "  rjmp m_wait_sc_high           \n"
 
   "  mov %[s_low], r16             \n"
   "  mov %[s_high], r17            \n"
@@ -146,24 +154,32 @@ uint32_t sniff()
 
   sei();
 
-  return ((uint32_t)reverseBits(slave_high_byte)) << 24 | \
-         ((uint32_t)reverseBits(slave_low_byte)) << 16 | \
-         reverseBits(master_high_byte) << 8 | \
-         reverseBits(master_low_byte);
+  return ((uint32_t)reverseBits(master_high_byte)) << 24 | \
+         ((uint32_t)reverseBits(master_low_byte)) << 16 | \
+         reverseBits(slave_high_byte) << 8 | \
+         reverseBits(slave_low_byte);
 }
 
 void sniffer_loop()
 {
   uint32_t value = 0;
-  
-  pinMode(SC_IN, INPUT);
-  pinMode(SD_IN, INPUT);
-  pinMode(SI_IN, INPUT);
-  pinMode(SO_IN, INPUT);
 
-  while (1) {
+  memset(&data[0], 0, sizeof(data));
+  
+  pinMode(PIN_SC, INPUT_PULLUP);
+  pinMode(PIN_SD, INPUT_PULLUP);
+  pinMode(PIN_SO, INPUT_PULLUP);
+
+  // Sample 100 samples and send them
+
+  int i = 0;
+  for (i = 0; i < sizeof(data) / sizeof(value); i++) {
     value = sniff();
-    Serial.write((byte *)&value, sizeof(value));
+    data[i] = value;
+  }
+
+  for (i = 0; i < sizeof(data) / sizeof(value); i++) {
+    Serial.write((uint8_t *)&data[i], sizeof(value));
     Serial.flush();
   }
 }

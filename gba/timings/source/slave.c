@@ -1,0 +1,3 @@
+void slave_main()
+{
+}

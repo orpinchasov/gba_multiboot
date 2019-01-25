@@ -1,5 +1,5 @@
 connector side
-orange - 3 - SI
+orange - 3 - SO (master SO, GBA SI)
 blue - 4 - SD
 brown - 5 - SC
 white - 6 - GND
