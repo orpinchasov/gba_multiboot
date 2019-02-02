@@ -35,7 +35,7 @@ u16 xfer(u16 data, bool verbose)
     //quit = 0;
 
     if (verbose)
-	   iprintf("send/receive = %04x%04x\n", REG_SIOMLT_SEND, REG_SIOMULTI1);
+	   iprintf("send/receive = %04x%04x\n", REG_SIOMULTI0, REG_SIOMULTI1);
 
     return REG_SIOMULTI1;
 }
@@ -118,14 +118,18 @@ void check_registers_states(void)
 // transmitted correctly to the slave
 void send_all_values(void)
 {
+    u16 data = 0;
 
+    for (u32 i = 0; i < 0x10000; i++) {
+        xfer(data + (uint16_t)i, 1);
+    }
 }
 
 void master_main(void)
 {
     iprintf("Detected as master\n");
 
-    u16 state = 0;
+    u16 state = 3;
 
     while (1) {
         VBlankIntrWait();
@@ -141,6 +145,11 @@ void master_main(void)
             break;
         case 2:
             check_registers_states();
+            ++state;
+            break;
+        case 3:
+            sanity_send();
+            send_all_values();
             ++state;
             break;
         default:

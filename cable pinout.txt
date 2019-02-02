@@ -1,5 +1,6 @@
 connector side
-orange - 3 - SO (master SO, GBA SI)
+black - Only 3P SI. Goes to the GBA SI
+orange - 3 - (3P) SO (goes to the GBA SO) (4P) SI (goes to the GBA SI)
 blue - 4 - SD
 brown - 5 - SC
 white - 6 - GND

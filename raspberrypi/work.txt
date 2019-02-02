@@ -1,0 +1,23 @@
+cat /proc/device-tree/model
+Raspberry Pi Model B Rev 2
+
+https://i.pinimg.com/originals/95/30/46/953046f96aeb9ab53eb91abff2b24bc8.jpg
+
+
+Starting with this:
+https://github.com/richardghirst/Panalyzer
+Trying to see some more signals from the GBA.
+
+
+The last post here saved me:
+https://www.raspberrypi.org/forums/viewtopic.php?f=29&t=52393&start=25
+
+
+BCM17 - SC
+BCM18 - SD
+BCM22 - SO (GBA SO)
+BCM23 - SI (GBA SI)
+
+Getting the register addresses:
+https://www.raspberrypi.org/documentation/hardware/raspberrypi/bcm2835/BCM2835-ARM-Peripherals.pdf
+https://github.com/raspberrypi/documentation/files/1888662/BCM2837-ARM-Peripherals.-.Revised.-.V2-1.pdf
